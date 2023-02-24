@@ -1,8 +1,19 @@
 # About
-- Scrapes Form 4 data from the SEC site and creates an Excel file with the data.
-- Uses multithreading to improve speed 
-- Line 58 can be modified to scrape every single report ever filed on record
-- Max # of threads is kept at 4 to avoid rate limit of 10 requests/second.
+This script extracts insider trading data from the Securities and Exchange Commission (SEC) website for a set of pre-defined companies, and saves it in an Excel file.
+
+The script uses the requests library to make HTTP requests and the BeautifulSoup library to parse the response HTML content. It also employs the concurrent.futures module to process multiple HTTP requests concurrently using threads, and the pandas library to create and write a pandas DataFrame to an Excel file.
+
+The main steps of the script include:
+
+1. Defining a dictionary of company CIK codes and the base URL and headers for making HTTP requests.
+
+2. Defining functions to scrape data for each company, to scrape the list of filing folders for a company, and to process the content of each filing folder.
+
+3. Looping through the companies, and calling the function to scrape data for each company.
+
+4. Writing the extracted data to an Excel file.
+
+The script runs for each company and scrapes the first 100 folders for simplicity. It processes each folder's contents to find and extract insider trading data and saves the collected data to an Excel file. Finally, it prints the total runtime of the script.
 
 # How to use 
 1. Clone Repo
