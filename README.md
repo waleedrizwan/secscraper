@@ -7,7 +7,7 @@ The main steps of the script include:
 
 1. Defining a dictionary of company CIK codes and the base URL and headers for making HTTP requests.
 
-2. Defining functions to scrape data for each company, to scrape the list of filing folders for a company, and to process the content of each filing folder.
+2. Defining functions to scrape data for each company, to scrape the list of filing folders for a company, and to process the content of each filing folder. 
 
 3. Looping through the companies, and calling the function to scrape data for each company.
 
@@ -16,7 +16,7 @@ The main steps of the script include:
 
 # How to use 
 1. Clone Repo
-2. Install dependencies using "pip install  -r requirements.txt"
-3. Run "python Scrape.py"
+2. Install dependencies using `pip install  -r requirements.txt`
+3. Run `python Scrape.py`
 4. Wait approx 4 min for scraping to complete
 5. Open Insider_Transactions.xls which will appear in the same directory
