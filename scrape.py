@@ -34,13 +34,11 @@ headers = {
 form_data = [] # Initialize an empty list to hold extracted data from SEC filings
 
 def scrape_all_company_data(companies):
-        
     # Loop through the companies
     for company, cik in companies.items():
         scrape_data_for_company(company, cik)
         
-def scrape_data_for_company(company, cik):
-        
+def scrape_data_for_company(company, cik):      
     print(f"Scraping company {company} with CIK {cik}")
     # Construct the URL for the company
     url = base_url + cik + "/"
@@ -93,7 +91,7 @@ def scrape_all_filing_folders(company, url, folder):
 def process_folder_content_link(company, folder_url, link):
     if "index.html" not in link.get_text():
         return 
-                    
+                   
     # contains link to folder containing form 4
     filing_detail_folder = folder_url + "/"  + link.get_text()               
     response = requests.get(filing_detail_folder, headers=headers)
