@@ -6,7 +6,7 @@ import threading
 import concurrent.futures
 import os
 
-max_threads = 6
+max_threads = 4
 
 # Define the company CIK codes
 companies = {
@@ -55,10 +55,11 @@ def scrape_data_for_company(company, cik):
     soup = BeautifulSoup(response.text, "html.parser")
     
     # Find all the folders on the page
-    folders = soup.find("table").find_all("a", {"href": True, "id": False})[:100]
+    folders = soup.find("table").find_all("a", {"href": True, "id": False})[:100] # first 100 folders for simplicity
     
-    # set limit to first 50 folders for simplicity
-    # folders = folders[:50]  
+    # if the full list is used, every single sec filing the company has ever made will be scraped
+
+
 
     # We can use a with statement to ensure threads are cleaned up promptly
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
