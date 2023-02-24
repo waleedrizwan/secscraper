@@ -1,5 +1,5 @@
 # About
-Scrapes Form 4 data from the SEC site and creates an Excel file with the data for easy viewing.
+Scrapes Form 4 data from the SEC site and creates an Excel file with the data.
 
 Run time varies with total # of companies and # of folders. 
 
