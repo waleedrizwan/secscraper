@@ -1,5 +1,5 @@
 # About
-Scrapes Form 4 data from the SEC site.
+Scrapes Form 4 data from the SEC site. Will summarize data and print to a generated Excel file called Insider_Transactions
 
 # How to use 
 - Clone Repo
