@@ -55,9 +55,7 @@ def scrape_data_for_company(company, cik):
     
     # Find all the folders on the page and keep the first 100 for simplicity
     folders = soup.find("table").find_all("a", {"href": True, "id": False})[:100]
-
-    # if the full list is used, every single sec filing the company has ever made will be scraped
-
+   
     # We can use a with statement to ensure threads are cleaned up promptly
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
         # Submit a thread for each folder to scrape data from each folder concurrently
