@@ -2,9 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import pandas as pd
-import threading
 import concurrent.futures
-import os
 
 max_threads = 4
 
@@ -158,7 +156,7 @@ def process_filing_detail(company, folder_url, link):
     except:  
         pass
 
-def printToExcel(data):
+def print_to_excel(data):
     # Create a pandas DataFrame from the extracted data
     df = pd.DataFrame(data)
 
@@ -194,7 +192,7 @@ def printToExcel(data):
 if __name__ == "__main__":
     start = time.time()
     scrape_all_company_data(companies)
-    printToExcel(form_data)
+    print_to_excel(form_data)
     end = time.time()
     #Subtract Start Time from The End Time
     total_time = end - start

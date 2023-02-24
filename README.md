@@ -1,5 +1,7 @@
 # About
-Scrapes Form 4 data from the SEC site. Creates an Excel file containing summarized data for easy viewing. Run time varies with total # of companies and # of folders. 
+Scrapes Form 4 data from the SEC site and creates an Excel file with the data for easy viewing.
+
+Run time varies with total # of companies and # of folders. 
 
 Takes approx 4 minutes to run given current company list.
 
@@ -9,11 +11,7 @@ Max # of threads is kept at 4 to avoid rate limit of 10 requests/second.
 
 # How to use 
 - Clone Repo
-- Install dependencies
-- Run Scrape.py
-- Open Insider_Transactions.xls in the same directory
-
-
-
-
-
+- Install dependencies using "pip install  -r requirements.txt"
+- Run "python Scrape.py"
+- Wait approx 4 min for scraping to complete
+- Open Insider_Transactions.xls which will appear in the same directory
