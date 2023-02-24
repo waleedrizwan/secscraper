@@ -108,7 +108,8 @@ def process_folder_content_link(company, folder_url, link):
 
 
 def process_filing_detail(company, folder_url, link):
-    should_process = ".xml" in link.get_text() and ("doc4" in link.get_text() or "form4" in link.get_text())
+    link_title = link.get_text() 
+    should_process = ".xml" in link_title and ("doc4" in link_title or "form4" in link_title)
     if not should_process:
         return
                                                                                                 
@@ -123,16 +124,15 @@ def process_filing_detail(company, folder_url, link):
         current_transaction = {}
 
         for transaction in non_derivative_transactions:
+            transaction_amounts = transaction.find('transactionAmounts') 
             security_title = transaction.find('securityTitle').find('value').get_text()
-            transaction_date = transaction.find('transactionDate').find('value').get_text()
-            
+            transaction_date = transaction.find('transactionDate').find('value').get_text()            
             transaction_code = transaction.find('transactionCoding').find('transactionCode').get_text()
-            transaction_shares = transaction.find('transactionAmounts').find('transactionShares').find('value').get_text()
-            
-            transaction_price_per_share = transaction.find('transactionAmounts').find("transactionPricePerShare").find("value")
+            transaction_shares = transaction_amounts.find('transactionShares').find('value').get_text()            
+            transaction_price_per_share = transaction_amounts.find("transactionPricePerShare").find("value")
 
             if transaction_price_per_share is not None:
-                transaction_price_per_share = transaction.find('transactionAmounts').find("transactionPricePerShare").find("value").get_text()
+                transaction_price_per_share = transaction_price_per_share.get_text()
 
             else:
                 transaction_price_per_share = ""
@@ -189,23 +189,6 @@ def printToExcel(data):
 
     # Save the Excel file
     writer.save()
-
-def process_element(func, element):
-    func(element)
-
-def process_list_concurrently(func, lst):
-    threads = []
-    for element in lst:
-        t = threading.Thread(target=process_element, args=(func, element,))
-        threads.append(t)
-        t.start()
-    for t in threads:
-        t.join()
-
-def process_list(lst):
-    # your function code here
-    for element in lst:
-        print("Processing element:", element)
 
 if __name__ == "__main__":
     start = time.time()
