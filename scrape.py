@@ -6,22 +6,20 @@ import threading
 import concurrent.futures
 import os
 
-
-max_threads = 4
+max_threads = 6
 
 # Define the company CIK codes
 companies = {
-    'TSLA': '0001318605'
-    # ,
-    # 'AAPL': '0000320193',
-    # 'AMZN': '0001018724',
-    # 'MSFT': '0000789019',
-    # 'GOOGL': '0001652044',
-    # 'CSCO': '0000858877',
-    # 'PYPL': '0001633917',
-    # 'NFLX': '0001065280',
-    # 'INTC': '0000050863',
-    # 'AMD': '0000002488',
+    'TSLA': '0001318605',
+    'AAPL': '0000320193',
+    'AMZN': '0001018724',
+    'MSFT': '0000789019',
+    'GOOGL': '0001652044',
+    'CSCO': '0000858877',
+    'PYPL': '0001633917',
+    'NFLX': '0001065280',
+    'INTC': '0000050863',
+    'AMD': '0000002488',
     
 }
 
@@ -57,7 +55,8 @@ def scrape_data_for_company(company, cik):
     soup = BeautifulSoup(response.text, "html.parser")
     
     # Find all the folders on the page
-    folders = soup.find_all("a", {"href": True, "id": False})
+    folders = soup.find("table").find_all("a", {"href": True, "id": False})[:100]
+    
     # set limit to first 50 folders for simplicity
     # folders = folders[:50]  
 
@@ -70,7 +69,9 @@ def scrape_data_for_company(company, cik):
                 future.result()
             except Exception as exc:
                 print('%r generated an exception: %s' % (folder.get_text(), exc))
-                
+            else:
+                print(folder.get_text())        
+
 def scrape_all_filing_folders(company, url, folder):                            
     # Get the text for the folder
     folder_text = folder.get_text()
@@ -89,7 +90,7 @@ def scrape_all_filing_folders(company, url, folder):
         print(f"Error accessing folder {folder_url} for company {company}: {e}")
         return
     
-    for link in folder_content.find_all("a", href=True):
+    for link in folder_content.find("table").find_all("a", href=True):
             process_folder_content_link(company, folder_url, link)
 
 def process_folder_content_link(company, folder_url, link):
