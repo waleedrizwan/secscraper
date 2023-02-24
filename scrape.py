@@ -1,23 +1,27 @@
 import requests
 from bs4 import BeautifulSoup
-import re
 import time
-import lxml
 import pandas as pd
 import threading
+import concurrent.futures
+import os
+
+
+max_threads = 4
 
 # Define the company CIK codes
 companies = {
-    'TSLA': '0001318605',
-    'AAPL': '0000320193',
-    'AMZN': '0001018724',
-    'MSFT': '0000789019',
-    'GOOGL': '0001652044',
-    'CSCO': '0000858877',
-    'PYPL': '0001633917',
-    'NFLX': '0001065280',
-    'INTC': '0000050863',
-    'AMD': '0000002488',
+    'TSLA': '0001318605'
+    # ,
+    # 'AAPL': '0000320193',
+    # 'AMZN': '0001018724',
+    # 'MSFT': '0000789019',
+    # 'GOOGL': '0001652044',
+    # 'CSCO': '0000858877',
+    # 'PYPL': '0001633917',
+    # 'NFLX': '0001065280',
+    # 'INTC': '0000050863',
+    # 'AMD': '0000002488',
     
 }
 
@@ -32,104 +36,126 @@ headers = {
 
 form_data = []
 
-def scrapeData(companies):
+def scrape_all_company_data(companies):
         
     # Loop through the companies
     for company, cik in companies.items():
-        print(f"Scraping company {company} with CIK {cik}")
-        # Construct the URL for the company
-        url = base_url + cik + "/"
-        try:
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            print(f"Error accessing company {company} at URL {url}: {e}")
-            continue
+        scrape_data_for_company(company, cik)
         
-        soup = BeautifulSoup(response.text, "html.parser")
+def scrape_data_for_company(company, cik):
         
-        # Find all the folders on the page
-        folders = soup.find_all("a", {"href": True, "id": False})
-        folders = folders[:100]  # set limit to first 30 folders for simplicity
+    print(f"Scraping company {company} with CIK {cik}")
+    # Construct the URL for the company
+    url = base_url + cik + "/"
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Error accessing company {company} at URL {url}: {e}")
+        return
+    
+    soup = BeautifulSoup(response.text, "html.parser")
+    
+    # Find all the folders on the page
+    folders = soup.find_all("a", {"href": True, "id": False})
+    # set limit to first 50 folders for simplicity
+    # folders = folders[:50]  
 
-        # Loop through the folders
-        for folder in folders:
-            # Get the text for the folder
-            folder_text = folder.get_text()
-            
-            # each filing folder is numerical 
+    # We can use a with statement to ensure threads are cleaned up promptly
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        future_to_folders = {executor.submit(scrape_all_filing_folders, company, url, folder): folder for folder in folders}
+        for future in concurrent.futures.as_completed(future_to_folders):
+            folder = future_to_folders[future]
             try:
-                # Construct the URL for the folder
-                folder_url = url + folder_text
+                future.result()
+            except Exception as exc:
+                print('%r generated an exception: %s' % (folder.get_text(), exc))
                 
-                # Access the folder URL and get its content
-                response = requests.get(folder_url, headers=headers)
-                response.raise_for_status()
-                folder_content = BeautifulSoup(response.text, "html.parser")
-                
-            except requests.exceptions.RequestException as e:
-                print(f"Error accessing folder {folder_url} for company {company}: {e}")
-                continue
+def scrape_all_filing_folders(company, url, folder):                            
+    # Get the text for the folder
+    folder_text = folder.get_text()
+    
+    # each filing folder is numerical 
+    try:
+        # Construct the URL for the folder
+        folder_url = url + folder_text
+        
+        # Access the folder URL and get its content
+        response = requests.get(folder_url, headers=headers)
+        response.raise_for_status()
+        folder_content = BeautifulSoup(response.text, "html.parser")
+        
+    except requests.exceptions.RequestException as e:
+        print(f"Error accessing folder {folder_url} for company {company}: {e}")
+        return
+    
+    for link in folder_content.find_all("a", href=True):
+            process_folder_content_link(company, folder_url, link)
+
+def process_folder_content_link(company, folder_url, link):
+    if "index.html" not in link.get_text():
+        return 
+                    
+    # contains link to folder containing form 4
+    filing_detail_folder = folder_url + "/"  + link.get_text()               
+    response = requests.get(filing_detail_folder, headers=headers)
+    response.raise_for_status()
+    filing_detail_content = BeautifulSoup(response.text, "html.parser")
+
+    for link in filing_detail_content.find_all("a", href=True):
+        process_filing_detail(company, folder_url, link)
+
+
+def process_filing_detail(company, folder_url, link):
+    should_process = ".xml" in link.get_text() and ("doc4" in link.get_text() or "form4" in link.get_text())
+    if not should_process:
+        return
+                                                                                                
+    form4_url = folder_url + "/" + link.get_text()
+    
+    try:
+        response = requests.get(form4_url, headers=headers)
+        response.raise_for_status()
+        form_4_content = BeautifulSoup(response.text, "xml")
+        non_derivative_table = form_4_content.find('nonDerivativeTable')
+        non_derivative_transactions = non_derivative_table.find_all('nonDerivativeTransaction')
+        current_transaction = {}
+
+        for transaction in non_derivative_transactions:
+            security_title = transaction.find('securityTitle').find('value').get_text()
+            transaction_date = transaction.find('transactionDate').find('value').get_text()
             
-            for link in folder_content.find_all("a", href=True):
-                if "index.html" in link.get_text():
-                                
-                    # contains link to folder containing form 4
-                    filing_detail_folder = folder_url + "/"  + link.get_text()               
-                    response = requests.get(filing_detail_folder, headers=headers)
-                    response.raise_for_status()
-                    filing_detail_content = BeautifulSoup(response.text, "html.parser")
+            transaction_code = transaction.find('transactionCoding').find('transactionCode').get_text()
+            transaction_shares = transaction.find('transactionAmounts').find('transactionShares').find('value').get_text()
+            
+            transaction_price_per_share = transaction.find('transactionAmounts').find("transactionPricePerShare").find("value")
 
-                    for link in filing_detail_content.find_all("a", href=True):
-                       
-                        if ".xml" in link.get_text() and ("doc4" in link.get_text() or "form4" in link.get_text()):                                                                                            
-                            form4_url = folder_url + "/" + link.get_text()
-                            
-                            try:
+            if transaction_price_per_share is not None:
+                transaction_price_per_share = transaction.find('transactionAmounts').find("transactionPricePerShare").find("value").get_text()
 
-                                response = requests.get(form4_url, headers=headers)
-                                response.raise_for_status()
-                                form_4_content = BeautifulSoup(response.text, "xml")
-                                non_derivative_table = form_4_content.find('nonDerivativeTable')
-                                non_derivative_transactions = non_derivative_table.find_all('nonDerivativeTransaction')
-                                current_transaction = {}
+            else:
+                transaction_price_per_share = ""
 
-                                for transaction in non_derivative_transactions:
-                                    security_title = transaction.find('securityTitle').find('value').get_text()
-                                    transaction_date = transaction.find('transactionDate').find('value').get_text()
-                                    
-                                    transaction_code = transaction.find('transactionCoding').find('transactionCode').get_text()
-                                    transaction_shares = transaction.find('transactionAmounts').find('transactionShares').find('value').get_text()
-                                    
-                                    transaction_price_per_share = transaction.find('transactionAmounts').find("transactionPricePerShare").find("value")
+            if form_4_content.find("officerTitle") is not None:
+                current_transaction["insiderTitle"] = form_4_content.find("officerTitle").get_text()
+                
+            else:
+                current_transaction["insiderTitle"] = ""
 
-                                    if transaction_price_per_share is not None:
-                                        transaction_price_per_share = transaction.find('transactionAmounts').find("transactionPricePerShare").find("value").get_text()
+            current_transaction["ticker"] = company 
+            current_transaction["insiderName"] = form_4_content.find("rptOwnerName").get_text()                            
+            current_transaction["securityType"] = security_title
+            current_transaction["purchaseDate"] = transaction_date
+            current_transaction["transactionCode"] = transaction_code
+            current_transaction["numShares"] = transaction_shares
+            current_transaction["pricePerShare"] = transaction_price_per_share
+            current_transaction["formURL"] = form4_url
 
-                                    else:
-                                        transaction_price_per_share = ""
+            if len(current_transaction) > 2:
+                form_data.append(current_transaction) 
+    except:  
+        pass
 
-                                    if form_4_content.find("officerTitle") is not None:
-                                        current_transaction["insiderTitle"] = form_4_content.find("officerTitle").get_text()
-                                        
-                                    else:
-                                        current_transaction["insiderTitle"] = ""
-
-                                    current_transaction["ticker"] = company
-                                    current_transaction["insiderName"] = form_4_content.find("rptOwnerName").get_text()                            
-                                    current_transaction["securityType"] = security_title
-                                    current_transaction["purchaseDate"] = transaction_date
-                                    current_transaction["transactionCode"] = transaction_code
-                                    current_transaction["numShares"] = transaction_shares
-                                    current_transaction["pricePerShare"] = transaction_price_per_share
-                                    current_transaction["formURL"] = form4_url
-
-                                    if len(current_transaction) > 2:
-                                        form_data.append(current_transaction)
-                                        
-                            except:  
-                                pass
-                            
 def printToExcel(data):
     # Create a pandas DataFrame from the extracted data
     df = pd.DataFrame(data)
@@ -163,14 +189,28 @@ def printToExcel(data):
     # Save the Excel file
     writer.save()
 
-start = time.time()
+def process_element(func, element):
+    func(element)
 
-scrapeData(companies)
-printToExcel(form_data)
+def process_list_concurrently(func, lst):
+    threads = []
+    for element in lst:
+        t = threading.Thread(target=process_element, args=(func, element,))
+        threads.append(t)
+        t.start()
+    for t in threads:
+        t.join()
 
-end = time.time()
-#Subtract Start Time from The End Time
-total_time = end - start
-print("\n Total Runtime"+ str(total_time//60), " Minutes")
+def process_list(lst):
+    # your function code here
+    for element in lst:
+        print("Processing element:", element)
 
-
+if __name__ == "__main__":
+    start = time.time()
+    scrape_all_company_data(companies)
+    printToExcel(form_data)
+    end = time.time()
+    #Subtract Start Time from The End Time
+    total_time = end - start
+    print("\n Total Runtime"+ str(total_time//60), " Minutes")
