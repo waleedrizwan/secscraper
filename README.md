@@ -5,10 +5,6 @@ Sample output folder contains a previously generated file.
 
 Max # of threads is kept at 4 to avoid rate limit of 10 requests/second.
 
-A slower connection may be able to higher # of threads.
-
-Tested and working at 4 threads.
-
 # How to use 
 - Clone Repo
 - Install dependencies
