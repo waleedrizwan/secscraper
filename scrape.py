@@ -1,9 +1,10 @@
-import requests
-from bs4 import BeautifulSoup
-import time
-import pandas as pd
-import concurrent.futures
+import requests                  # Import the requests library for making HTTP requests
+from bs4 import BeautifulSoup    # Import BeautifulSoup for parsing HTML content
+import time                      # Import the time library for timing the script
+import pandas as pd              # Import pandas library for creating a DataFrame and writing to Excel
+import concurrent.futures        # Import the concurrent.futures module for multi-threading
 
+# Set the maximum number of threads to use for multi-threading
 max_threads = 4
 
 # Define the company CIK codes
@@ -30,7 +31,7 @@ headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36",
 }
 
-form_data = []
+form_data = [] # Initialize an empty list to hold extracted data from SEC filings
 
 def scrape_all_company_data(companies):
         
@@ -52,25 +53,24 @@ def scrape_data_for_company(company, cik):
     
     soup = BeautifulSoup(response.text, "html.parser")
     
-    # Find all the folders on the page
-    folders = soup.find("table").find_all("a", {"href": True, "id": False})[:100] # first 100 folders for simplicity
-    
+    # Find all the folders on the page and keep the first 100 for simplicity
+    folders = soup.find("table").find_all("a", {"href": True, "id": False})[:100]
+
     # if the full list is used, every single sec filing the company has ever made will be scraped
-
-
 
     # We can use a with statement to ensure threads are cleaned up promptly
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        # Submit a thread for each folder to scrape data from each folder concurrently
         future_to_folders = {executor.submit(scrape_all_filing_folders, company, url, folder): folder for folder in folders}
+        # Process the futures as they complete
         for future in concurrent.futures.as_completed(future_to_folders):
+            # Get the folder associated with the completed future
             folder = future_to_folders[future]
             try:
                 future.result()
             except Exception as exc:
                 print('%r generated an exception: %s' % (folder.get_text(), exc))
-            else:
-                print(folder.get_text())        
-
+                   
 def scrape_all_filing_folders(company, url, folder):                            
     # Get the text for the folder
     folder_text = folder.get_text()

@@ -13,7 +13,6 @@ The main steps of the script include:
 
 4. Writing the extracted data to an Excel file.
 
-The script runs for each company and scrapes the first 100 folders for simplicity. It processes each folder's contents to find and extract insider trading data and saves the collected data to an Excel file. Finally, it prints the total runtime of the script.
 
 # How to use 
 1. Clone Repo
