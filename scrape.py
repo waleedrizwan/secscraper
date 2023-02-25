@@ -3,9 +3,15 @@ from bs4 import BeautifulSoup    # Import BeautifulSoup for parsing HTML content
 import time                      # Import the time library for timing the script
 import pandas as pd              # Import pandas library for creating a DataFrame and writing to Excel
 import concurrent.futures        # Import the concurrent.futures module for multi-threading
+import sys                       # sys module provides access to any command-line arguments
 
 # Set the maximum number of threads to use for multi-threading
-max_threads = 4
+max_threads = 3
+
+# each company page contains approx 1500 folders
+# to retreive the most recent filings, we can take the first 100
+# sys.argv is the list of command-line arguments
+folder_count = int(sys.argv[1])
 
 # Define the company CIK codes
 companies = {
@@ -52,7 +58,7 @@ def scrape_data_for_company(company, cik):
     soup = BeautifulSoup(response.text, "html.parser")
     
     # Find all the folders on the page and keep the first 100 for simplicity
-    folders = soup.find("table").find_all("a", {"href": True, "id": False})[:100]
+    folders = soup.find("table").find_all("a", {"href": True, "id": False})[:folder_count]
    
     # We can use a with statement to ensure threads are cleaned up promptly
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
@@ -192,4 +198,4 @@ if __name__ == "__main__":
     end = time.time()
     #Subtract Start Time from The End Time
     total_time = end - start
-    print("\n Total Runtime"+ str(total_time//60), " Minutes")
+    print("\n Total Runtime "+ str(total_time//60), " Minutes")
