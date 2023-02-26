@@ -8,8 +8,6 @@ import sys                       # sys module provides access to any command-lin
 # Set the maximum number of threads to use for multi-threading
 max_threads = 4
 
-# each company page contains approx 1500 folders
-# to retreive the most recent filings, we can take the first 100
 # sys.argv is the list of command-line arguments
 folder_count = int(sys.argv[1])
 
@@ -25,7 +23,6 @@ companies = {
     'NFLX': '0001065280',
     'INTC': '0000050863',
     'AMD': '0000002488',
-    
 }
 
 # Define the base URL and headers
@@ -61,9 +58,6 @@ def scrape_data_for_company(company, cik):
     # Find all the folders on the page and keep the first 100 for simplicity
     folders = soup.find("table").find_all("a", {"href": True, "id": False})[:folder_count]
     
-    # To run with no multi threading
-    # scrape_all_filing_folders(company, url, folder) 
-    
     # We can use a with statement to ensure threads are cleaned up promptly
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
         # Submit a thread for each folder to scrape data from each folder concurrently
@@ -80,8 +74,7 @@ def scrape_data_for_company(company, cik):
 def scrape_all_filing_folders(company, url, folder):                            
     # Get the text for the folder
     folder_text = folder.get_text()
-    time.sleep(1)  # Add a delay after each request
-    # each filing folder is numerical 
+    
     try:
         # Construct the URL for the folder
         folder_url = url + folder_text
