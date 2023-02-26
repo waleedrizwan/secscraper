@@ -9,7 +9,7 @@ Extracts insider trading data from the Securities and Exchange Commission (SEC) 
 - To add or remove companies modify the **`companies`** dictionary to include ticker symbol and CIK
 
 
-## Rate Limit Issues With Multi-Threading 
+## Rate Limit/Error 429 
 - The script uses multithreading to reduce runtime
 - The global variable **`max_threads`** defines the number of threads to be used
 - Fluctuations in network speed can lead to exceeding the rate limit of 10 requests/second
