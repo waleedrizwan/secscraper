@@ -8,7 +8,7 @@ Extracts insider trading data from the Securities and Exchange Commission (SEC) 
 
 ## Rate Limit Issues With Multi-Threading 
 - The script uses multithreading to reduce runtime
-- The global variable `max_treads` defines the number of threads to be used
+- The global variable `max_threads` defines the number of threads to be used
 - Fluctuations in network speed can lead to exceeding the rate limit of 10 requests/second
 - In this case wait 10 minutes before running again and try reducing `max_threads` by 1
 
