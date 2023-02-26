@@ -3,7 +3,7 @@ Extracts insider trading data from the Securities and Exchange Commission (SEC) 
 
 `scrape.py` uses the requests library to make HTTP requests and the BeautifulSoup library to parse the response HTML content. It also employs the concurrent.futures module to process multiple HTTP requests concurrently using threads, and the pandas library to create and write a pandas DataFrame to an Excel file.
 
-`visualize.py` creates a visualization of the historical stock prices and insider transactions for a selection of stocks. It reads the insider transaction data from an Excel file. The `plot_stock()` function is defined to plot the stock price and insider transactions on a subplot for each stock. 
+`visualize.py` plots the historical stock prices and insider transactions for a list of stocks using the yfinance, pandas, and matplotlib libraries. 
 
 
 ## Rate Limit Issues With Multi-Threading 
