@@ -27,12 +27,13 @@ The main steps of the script include:
 - It is possible to scrape all folders for each company but this will drastically increase runtime 
 
 
-# Visualization
-
-
 # How To Use 
 1. Clone Repo
 2. Install dependencies using `pip install  -r requirements.txt`
 3. Run `python scrape.py x` where `x` is the number of folders that will be scraped per company
 4. Wait until the script has finished executing
 5. All data scraped will be visible in `Insider_Transactions.xlsx` which will appear in the same directory
+
+# How To Visualize Data
+1. Run `python visualize.py` 
+2. Graphs will pop up in a seperate window
