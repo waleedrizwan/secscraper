@@ -18,7 +18,7 @@ Extracts insider trading data from the Securities and Exchange Commission (SEC) 
 ## Folder Count Command Line Argument
 - Each company has a folders page which contain all files relating to every SEC filing made
 - This script allows you to choose the number of folders you would like to scrape as a command line argument
-- 100 folders goes back approx 1 year
+- **100** folders goes back approx 1 year
 - It is possible to scrape all folders for each company but this will drastically increase runtime 
 
 ## How To Use 
