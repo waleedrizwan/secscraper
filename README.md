@@ -17,7 +17,7 @@ Extracts insider trading data from the Securities and Exchange Commission (SEC) 
 - Mulithreading can be eliminated by calling **`scrape_all_filing_folders()`** in **`scrape_data_for_company()`**
 
 ## Folder Count Command Line Argument
-- Each company has a folders page which contain all files relating to every SEC filing made
+- Each company has a folders page which contains all files relating to every SEC filing made 
 - This script allows you to choose the number of folders you would like to scrape as a command line argument
 - **100** folders goes back approx 1 year
 - It is possible to scrape every SEC filing for each company but this will drastically increase runtime 
