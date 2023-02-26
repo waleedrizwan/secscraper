@@ -24,7 +24,7 @@ Extracts insider trading data from the Securities and Exchange Commission (SEC) 
 ## How To Use 
 1. Clone Repo
 2. Install dependencies using `pip install  -r requirements.txt`
-3. Run `python scrape.py x` where `x` is the number of folders that will be scraped per company (use 100 for testing)
+3. Run `python scrape.py n`, `n` is the number of folders that will be scraped per company (use 100 for testing)
 4. Wait until the script has finished executing
 5. All data scraped will be visible in `Insider_Transactions.xlsx` which will appear in the same directory
 
