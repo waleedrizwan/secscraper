@@ -6,7 +6,7 @@ Extracts insider trading data from the Securities and Exchange Commission (SEC) 
 `visualize.py` plots the historical stock prices and insider transactions for a list of stocks using the yfinance, pandas, and matplotlib libraries. 
 
 ## Companies
-- To add or remove companies modify the `companies` dictionary along with its CIK
+- To add or remove companies modify the `companies` dictionary to inlcude ticker symbol along with its CIK
 
 
 ## Rate Limit Issues With Multi-Threading 
