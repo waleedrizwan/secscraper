@@ -6,7 +6,7 @@ import concurrent.futures        # Import the concurrent.futures module for mult
 import sys                       # sys module provides access to any command-line arguments
 
 # Set the maximum number of threads to use for multi-threading
-max_threads = 3
+max_threads = 4
 
 # each company page contains approx 1500 folders
 # to retreive the most recent filings, we can take the first 100
@@ -51,6 +51,7 @@ def scrape_data_for_company(company, cik):
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
+        
     except requests.exceptions.RequestException as e:
         print(f"Error accessing company {company} at URL {url}: {e}")
         return
@@ -59,7 +60,7 @@ def scrape_data_for_company(company, cik):
     
     # Find all the folders on the page and keep the first 100 for simplicity
     folders = soup.find("table").find_all("a", {"href": True, "id": False})[:folder_count]
-   
+    print(folders)
     # We can use a with statement to ensure threads are cleaned up promptly
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
         # Submit a thread for each folder to scrape data from each folder concurrently
@@ -76,7 +77,7 @@ def scrape_data_for_company(company, cik):
 def scrape_all_filing_folders(company, url, folder):                            
     # Get the text for the folder
     folder_text = folder.get_text()
-    
+    time.sleep(1)  # Add a delay after each request
     # each filing folder is numerical 
     try:
         # Construct the URL for the folder
@@ -159,11 +160,13 @@ def process_filing_detail(company, folder_url, link):
         pass
 
 def print_to_excel(data):
+    if not(data):
+        print("Error with scraping, form_data is empty") 
+        return 
+    
     # Create a pandas DataFrame from the extracted data
     df = pd.DataFrame(data)
-
     df = df[['purchaseDate', 'ticker', 'insiderName', 'insiderTitle', 'securityType', 'transactionCode', 'numShares', 'pricePerShare', "formURL"]]
-
     # Create an Excel writer object
     writer = pd.ExcelWriter('insider_transactions.xlsx')
 
