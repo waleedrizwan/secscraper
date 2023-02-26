@@ -21,6 +21,7 @@ Extracts insider trading data from the Securities and Exchange Commission (SEC) 
 - This script allows you to choose the number of folders you would like to scrape as a command line argument
 - **100** folders goes back approx 1 year
 - It is possible to scrape every SEC filing for each company but this will drastically increase runtime 
+- To scrape all filings on record, call **`scrape_all_filing_folders()`** on the full folders list
 
 ## How To Use 
 1. Clone Repo
