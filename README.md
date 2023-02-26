@@ -14,12 +14,13 @@ Extracts insider trading data from the Securities and Exchange Commission (SEC) 
 - Fluctuations in network speed can lead to exceeding the rate limit of 10 requests/second
 - In this case wait 10 minutes before running again and try reducing **`max_threads`** by 1
 - Each additional request before the 10 minute cooldown is finished increases it by another 10 minutes
+- Mulithreading can be eliminated by calling **`scrape_all_filing_folders(company, url, folder)`** in **`scrape_data_for_company`**
 
 ## Folder Count Command Line Argument
 - Each company has a folders page which contain all files relating to every SEC filing made
 - This script allows you to choose the number of folders you would like to scrape as a command line argument
 - **100** folders goes back approx 1 year
-- It is possible to scrape all folders for each company but this will drastically increase runtime 
+- It is possible to scrape every SEC filing for each company but this will drastically increase runtime 
 
 ## How To Use 
 1. Clone Repo
